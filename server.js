@@ -1,44 +1,64 @@
 const express = require('express');
 const app = express();
-const pokemon = require('./models/pokemon')
-const port = 3000;
+const React = require('react')
+const path = require('path');
+const pokemon = require('./models/pokemon');
+const bodyParser = require('body-parser');
 
+const port = 3000
 
-app.set('view engine', 'jsx')
+//* setting my view-engine for JSX 
+app.set('view engine', 'jsx');
 app.engine('jsx', require('jsx-view-engine').createEngine());
 
+// * Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
-// Setting up the middleware to run in our app
-app.use((req, res, next) => {
-    // console.log('I run for all routes');
-    /**
-     * To see where the request is coming from
-     */
-    console.log(req.url);
-    next();
-});
-
-app.use(express.urlencoded({extended: false}))
-
-
+// * My established routes
 
 app.get('/', (req, res) => {
-    res.send('<h1>Welcome to the Pokemon App!</h1>')
-});
+    res.send('<h1>Welcome to my Pokemon App BigB Jules.</h1>!')
+})
 
-// *route to get the pokemon list from pokemon.js
+//* GET all pokemon
 app.get('/pokemon', (req, res) => {
-    res.send(pokemon)
+  res.render('Index', { pokemon });
+});
+
+//* GET a specific pokemon
+app.get('/pokemon/:name', (req, res) => {
+  const { name } = req.params;
+  const foundPokemon = pokemon.find((p) => p.name === name);
+  res.render('Show', { pokemon: foundPokemon });
+});
+
+//* POST a new pokemon
+app.post('/pokemon', (req, res) => {
+  const { name, img } = req.body;
+  pokemon.push({ name, img });
+  res.redirect('/pokemon');
+});
+
+//* PUT an updated pokemon
+app.put('/pokemon/:name', (req, res) => {
+  const { name } = req.params;
+  const { img } = req.body;
+  const foundPokemon = pokemon.find((p) => p.name === name);
+  foundPokemon.img = img;
+  res.redirect(`/pokemon/${name}`);
+});
+
+//* DELETE a pokemon
+app.delete('/pokemon/:name', (req, res) => {
+  const { name } = req.params;
+  const index = pokemon.findIndex((p) => p.name === name);
+  pokemon.splice(index, 1);
+  res.redirect('/pokemon');
 });
 
 
 
-
-
-
-
-// * Server running verification listening on port 3000
 app.listen(port, () => {
-    // * console logging to see when the server is running.
-    console.log(`POKEMON_APP are listening on port ${port}!`)
-});
+    console.log(`POKEMON are listening on port ${port}! for Brahima's actions`)
+})
